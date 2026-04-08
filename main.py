@@ -369,26 +369,25 @@ def _match_command(query, cmd_key):
 # ─── Main Loop ───────────────────────────────
 
 if __name__ == '__main__':
+    # Optional launcher: run the terminal assistant with `python main.py --assistant`
+    if '--assistant' in sys.argv:
+        ta_path = os.path.join(os.path.dirname(__file__), 'terminal_assistant.py')
+        try:
+            subprocess.run([sys.executable, ta_path])
+        except Exception as e:
+            print('Failed to launch terminal assistant:', e)
+        sys.exit(0)
+
     print('Welcome to Jarvis A.I')
-    say("জারভিস AI চালু হয়েছে। রুন্টু স্যার, আমি প্রস্তুত।")
+    say("জারভিস AI চালু হয়েছে। রুন্তু স্যার, আমি প্রস্তুত।") 
 
     SLEEP_AFTER_SECONDS = 12
 
     while True:
-        print("Waiting for wake word...")
-        heard = takeCommand_timed(timeout=6, phrase_time_limit=4)
-        if not heard:
-            continue
-
-        heard_l = heard.lower()
-        if not any(w.lower() in heard_l for w in WAKE_WORDS):
-            continue
-
-        # ── Wake word detected ──
-        say("হ্যাঁ স্যার, বলুন।")
+        print("Listening for commands (no wake word required)...")
+        # Directly listen for a command and act when something is recognized.
         cmd = takeCommand_timed(timeout=10, phrase_time_limit=8)
         if not cmd:
-            say("কিছু শুনতে পাইনি। আবার ডাকুন।")
             continue
 
         query = cmd  # keep original case for display; use .lower() only for matching
@@ -501,6 +500,9 @@ if __name__ == '__main__':
                 say("পেজ খোলার সময় সমস্যা হয়েছে।")
             continue
 
-        # 9) Default → chat with Gemini (বাংলায়)
-        print("Chatting...")
-        chat(query)
+        # 9) Default → (Gemini chat disabled per user request)
+        # print("Chatting...")
+        # chat(query)
+        # If no specific action was matched, inform the user.
+        # You can re-enable chat(query) above if you want Gemini responses again.
+        say("কমান্ড পাওয়া যায়নি বা Gemini চ্যাট নিষ্ক্রিয়।")

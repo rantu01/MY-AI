@@ -6,3 +6,5 @@ requests
 numpy
 pyautogui
 pyaudio
+pyperclip
+pygetwindow
