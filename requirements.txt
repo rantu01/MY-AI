@@ -4,3 +4,5 @@ gTTS
 playsound
 requests
 numpy
+pyautogui
+pyaudio

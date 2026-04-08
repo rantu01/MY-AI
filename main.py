@@ -12,6 +12,10 @@ import sys
 import base64
 import subprocess
 import time
+from actions.type_and_enter import type_text
+from actions.close_tabs import close_all_tabs
+from actions.open_pew_and_whatsapp import open_pew_and_whatsapp
+from actions.whatsapp_send import send_whatsapp_message
 
 # ── gTTS ──
 try:
@@ -442,6 +446,59 @@ if __name__ == '__main__':
         # 8) AI ফাইলে সেভ
         if _match_command(query_l, "ai_save"):
             ai(prompt=query)
+            continue
+
+        # 9) Default → chat with Gemini (বাংলায়)
+        # Custom voice-triggered actions
+        q = query_l
+
+        # Type text and optionally press Enter
+        if any(k in q for k in ["type", "টাইপ", "লিখ", "লিখো", "কিছু টাইপ", "কিছু টাইপ করো", "টাইপ করো"]):
+            say("কি টেক্সট টাইপ করব বলুন।")
+            txt = takeCommand_timed(timeout=8, phrase_time_limit=6)
+            if not txt:
+                say("কিছু শুনতে পাইনি।")
+                continue
+            say("এন্টার চাপতে হবে কি? হ্যাঁ বা না বলুন।")
+            ans = takeCommand_timed(timeout=5, phrase_time_limit=3).lower()
+            press_enter = False
+            if ans and any(a in ans for a in ["হ্যাঁ", "হাঁ", "হ্যা", "yes", "জি", "हाँ", "ha"]):
+                press_enter = True
+            try:
+                type_text(txt, press_enter=press_enter)
+                say("টেক্সট টাইপ করা হয়েছে।")
+            except Exception as e:
+                say("টাইপ করার সময় সমস্যা হয়েছে।")
+            continue
+
+        # Close all tabs
+        if any(k in q for k in ["সব ট্যাব", "sob tab", "tab close", "সব ট্যাব বন্ধ", "ট্যাব বন্ধ"]):
+            say("সব ট্যাব বন্ধ করা শুরু করা হচ্ছে।")
+            try:
+                close_all_tabs()
+                say("সব ট্যাব বন্ধ করা হয়েছে।")
+            except Exception:
+                say("ট্যাব বন্ধ করতে পারলাম না।")
+            continue
+
+        # Open Pew chat in Chrome and WhatsApp, then optionally send a WhatsApp message
+        if "pew" in q or "pew er chat" in q or "চ্যাট করো" in q:
+            say("Pew chat এবং WhatsApp ওয়েব খোলা হচ্ছে।")
+            try:
+                open_pew_and_whatsapp()
+                say("WhatsApp খোলা হয়েছে। এখন মেসেজ পাঠাব কি? হ্যাঁ বললে পাঠিয়ে দেব।")
+                ans = takeCommand_timed(timeout=8, phrase_time_limit=4).lower()
+                if ans and any(a in ans for a in ["হ্যাঁ", "হাঁ", "হ্যা", "yes", "জি", "ha"]):
+                    # send the predefined message
+                    try:
+                        send_whatsapp_message("কি করছো")
+                        say("মেসেজ পাঠানো হয়েছে।")
+                    except Exception:
+                        say("মেসেজ পাঠাতে পারলাম না।")
+                else:
+                    say("ঠিক আছে, কোন মেসেজ পাঠানো হয়নি।")
+            except Exception:
+                say("পেজ খোলার সময় সমস্যা হয়েছে।")
             continue
 
         # 9) Default → chat with Gemini (বাংলায়)
